@@ -1,0 +1,13 @@
+﻿# Wrangler local dev state
+.wrangler/
+
+# Secret env vars - NEVER commit this
+.dev.vars
+
+# Node
+node_modules/
+dist/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,16 @@
+name = "esolat-mcp"
+main = "src/index.ts"
+compatibility_date = "2024-11-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Worker runs on Cloudflare's global edge network
+# No KV, Durable Objects, or D1 needed — fully stateless
+
+[vars]
+# Override this with: wrangler secret put MCP_WEBHOOK_TOKEN
+# MCP_WEBHOOK_TOKEN = "your-secret-token-here"
+
+# Optional: custom routes (if using a custom domain)
+# [[routes]]
+# pattern = "esolat.yourdomain.com/mcp/*"
+# zone_name = "yourdomain.com"
