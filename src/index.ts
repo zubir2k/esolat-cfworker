@@ -54,7 +54,7 @@ const TOOLS = [
         },
         latitude: { type: "number", description: "GPS latitude" },
         longitude: { type: "number", description: "GPS longitude" },
-        month: { type: "integer", description: "Month number 1â€“12 (default: current month)", minimum: 1, maximum: 12 },
+        month: { type: "integer", description: "Month number 1-12 (default: current month)", minimum: 1, maximum: 12 },
         year: { type: "integer", description: "4-digit year (default: current year)" },
       },
     },
@@ -552,7 +552,7 @@ export default {
 
       const corsHeaders = {
         "Access-Control-Allow-Origin": "*",
-        "Content-Type": "application/json",
+        "Content-Type": "application/json; charset=utf-8",
       };
 
       // Batch support
@@ -574,4 +574,6 @@ export default {
     return Response.json({ error: "Not found" }, { status: 404 });
   },
 };
+
+
 
