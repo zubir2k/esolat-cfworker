@@ -1,11 +1,12 @@
-# esolat-mcp — Cloudflare Worker Edition
+![CloudflareWorker](https://github.com/user-attachments/assets/89a2e7d4-7aaa-4de9-aa6b-ea97b18dc5bd)
 
-[![MCP](https://img.shields.io/badge/MCP-Compatible-blue)](https://modelcontextprotocol.io/)
+[![GitHub Repo stars](https://img.shields.io/github/stars/zubir2k/esolat-cfworker?style=social)](https://github.com/zubir2k/esolat-cfworker/stargazers)
 [![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-orange)](https://workers.cloudflare.com/)
+[![MCP](https://img.shields.io/badge/MCP-Compatible-blue)](https://modelcontextprotocol.io/)
 [![M365 Copilot](https://img.shields.io/badge/M365-Copilot%20Ready-0078D4)](https://adoption.microsoft.com/en-us/copilot/)
+[![Buy](https://img.shields.io/badge/Belanja-Coffee-yellow.svg)](https://zubirco.de/buymecoffee)
 
-Port of [esolat-mcp](https://github.com/zubir2k/esolat-mcp) to **Cloudflare Workers** as a fully stateless **MCP Streamable HTTP** server.
-
+Port of [esolat-mcp](https://github.com/zubir2k/esolat-mcp) to **Cloudflare Workers** as a fully stateless **MCP Streamable HTTP** server. \
 No Docker. No Python. No server to manage. Runs on Cloudflare's global edge — free tier eligible.
 
 ## Features
@@ -20,6 +21,16 @@ No Docker. No Python. No server to manage. Runs on Cloudflare's global edge — 
   - `get_yearly_islamic_events` — JAKIM or Aladhan
 - ✅ CORS headers for browser-based clients
 - ✅ Batch JSON-RPC support
+
+---
+
+## Endpoints
+
+| Path | Description |
+|------|-------------|
+| `/` | Landing page with endpoint info |
+| `/mcp/<TOKEN>/mcp` | **MCP endpoint** — point your client here |
+| `/mcp/<TOKEN>/health` | Health dashboard (upstream API status) |
 
 ---
 
@@ -61,30 +72,6 @@ https://esolat-mcp.<your-subdomain>.workers.dev
 
 ---
 
-## Endpoints
-
-| Path | Description |
-|------|-------------|
-| `/` | Landing page with endpoint info |
-| `/mcp/<TOKEN>/mcp` | **MCP endpoint** — point your client here |
-| `/mcp/<TOKEN>/health` | Health dashboard (upstream API status) |
-
----
-
-## Connecting to M365 Copilot
-
-In **Microsoft 365 Copilot Studio** or **Copilot extensibility settings**:
-
-1. Add a new **MCP connector**
-2. Set the URL to:
-   ```
-   https://esolat-mcp.<your-subdomain>.workers.dev/mcp/<YOUR_TOKEN>/mcp
-   ```
-3. Transport: **Streamable HTTP**
-4. No additional auth headers needed (token is in the path)
-
----
-
 ## Local Development
 
 ```bash
@@ -115,7 +102,7 @@ curl -X POST http://localhost:8787/mcp/<TOKEN>/mcp \
 ## Architecture
 
 ```
-M365 Copilot / Claude.ai
+Claude.ai / M365 Copilot
         │
         │  HTTPS POST (JSON-RPC 2.0)
         ▼
@@ -131,11 +118,37 @@ Cloudflare Workers Edge
         ├──► api.aladhan.com     (Global fallback)
         └──► nominatim.osm.org   (Geocoding)
 ```
+---
+
+## Connecting to M365 Copilot
+
+In **Microsoft 365 Copilot Studio** or **Copilot extensibility settings**:
+
+1. Add a new **MCP connector**
+2. Set the URL to:
+   ```
+   https://esolat-mcp.<your-subdomain>.workers.dev/mcp/<YOUR_TOKEN>/mcp
+   ```
+3. Transport: **Streamable HTTP**
+4. No additional auth headers needed (token is in the path)
 
 ## Credits
 
-- [e-solat JAKIM](https://www.e-solat.gov.my/) — Official Malaysian prayer times
-- [WaktuSolat.app](https://waktusolat.app/) — GPS-based prayer time API
-- [Aladhan API](https://aladhan.com/prayer-times-api) — Global fallback
-- [OpenStreetMap / Overpass API](https://overpass-api.de/) — Global mosque finder
-- Original Python server: [zubir2k/esolat-mcp](https://github.com/zubir2k/esolat-mcp)
+- [e-solat](https://www.e-solat.gov.my/) JAKIM - For the official prayer times
+- [WaktuSolat.app](https://waktusolat.app/) - Prayer Time by GPS
+- [Model Context Protocol](https://modelcontextprotocol.io/) - For the MCP framework
+
+## License
+
+This project is licensed under the MIT License.
+
+## Disclaimer & Data Source
+
+### Important Notice & Reliability Disclaimer
+This integration pulls data directly from the official **e-Solat JAKIM (Department of Islamic Development Malaysia)** portal. However, please note:
+
+- **No Liability:** This integration is a community-driven project provided "as is" without any guarantees. The maintainer is **not solely or legally responsible** for any discrepancies, inaccuracies, delays, or omissions in prayer times or calendar dates.
+- **Verify Important Times:** Users are strictly advised to regularly check and verify times against the official **[JAKIM eSolat Portal](https://www.e-solat.gov.my/)** or official local announcements, especially for critical obligations (e.g., fasting, community prayers).
+- **Network & Upstream Dependencies:** Synchronization depends on upstream API availability and local network connectivity. Discrepancies caused by unexpected server updates from JAKIM or local server downtime are outside the control of this software.
+
+*By using this tool, you acknowledge and agree that the developer holds no liability for missed schedules or data inaccuracies.*
