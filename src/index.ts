@@ -1,5 +1,5 @@
-/**
- * esolat-mcp — Cloudflare Worker Edition
+﻿/**
+ * esolat-mcp â€” Cloudflare Worker Edition
  * MCP Streamable HTTP server for Malaysian prayer times, mosque finder, Islamic events
  * Compatible with M365 Copilot, Claude.ai, and any MCP Streamable HTTP client
  *
@@ -11,7 +11,7 @@ export interface Env {
   MCP_WEBHOOK_TOKEN: string;
 }
 
-// ─── Hijri Month Names ───────────────────────────────────────────────────────
+// â”€â”€â”€ Hijri Month Names â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const HIJRI_MONTHS: Record<string, string> = {
   "01": "Muharram",     "02": "Safar",          "03": "Rabi'ul Awwal",
@@ -20,7 +20,7 @@ const HIJRI_MONTHS: Record<string, string> = {
   "10": "Syawal",       "11": "Zulkaedah",       "12": "Zulhijjah",
 };
 
-// ─── MCP Protocol Types ──────────────────────────────────────────────────────
+// â”€â”€â”€ MCP Protocol Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 interface MCPRequest {
   jsonrpc: "2.0";
@@ -36,7 +36,7 @@ interface MCPResponse {
   error?: { code: number; message: string; data?: unknown };
 }
 
-// ─── Tool Definitions (MCP schema) ───────────────────────────────────────────
+// â”€â”€â”€ Tool Definitions (MCP schema) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const TOOLS = [
   {
@@ -54,7 +54,7 @@ const TOOLS = [
         },
         latitude: { type: "number", description: "GPS latitude" },
         longitude: { type: "number", description: "GPS longitude" },
-        month: { type: "integer", description: "Month number 1–12 (default: current month)", minimum: 1, maximum: 12 },
+        month: { type: "integer", description: "Month number 1â€“12 (default: current month)", minimum: 1, maximum: 12 },
         year: { type: "integer", description: "4-digit year (default: current year)" },
       },
     },
@@ -102,7 +102,7 @@ const TOOLS = [
   },
 ];
 
-// ─── Geo Helpers ─────────────────────────────────────────────────────────────
+// â”€â”€â”€ Geo Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function isMalaysia(lat: number, lon: number): boolean {
   return lat >= 1.0 && lat <= 7.5 && lon >= 99.5 && lon <= 119.5;
@@ -118,7 +118,7 @@ function haversine(lat1: number, lon1: number, lat2: number, lon2: number): numb
   return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) * 100) / 100;
 }
 
-// ─── Location Resolver ───────────────────────────────────────────────────────
+// â”€â”€â”€ Location Resolver â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 async function resolveLocation(
   locationName?: string,
@@ -140,14 +140,14 @@ async function resolveLocation(
   throw new Error("Provide either location_name or latitude/longitude coordinates.");
 }
 
-// ─── Epoch → HH:MM (UTC+8) ───────────────────────────────────────────────────
+// â”€â”€â”€ Epoch â†’ HH:MM (UTC+8) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function epochToMY(ts: number): string {
   const d = new Date((ts + 8 * 3600) * 1000);
   return `${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")}`;
 }
 
-// ─── Date Helpers ────────────────────────────────────────────────────────────
+// â”€â”€â”€ Date Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function dayName(year: number, month: number, day: number): string {
   const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
@@ -158,7 +158,7 @@ function hijriLabel(hm: string, monthMap: Record<string, string>) {
   return monthMap[hm] ?? hm;
 }
 
-// ─── Tool Implementations ────────────────────────────────────────────────────
+// â”€â”€â”€ Tool Implementations â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 async function toolGetPrayerTimes(args: Record<string, unknown>): Promise<unknown> {
   const [lat, lon] = await resolveLocation(
@@ -352,7 +352,7 @@ async function toolGetIslamicEvents(args: Record<string, unknown>): Promise<unkn
   return events;
 }
 
-// ─── MCP Request Router ──────────────────────────────────────────────────────
+// â”€â”€â”€ MCP Request Router â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 async function handleMCP(req: MCPRequest): Promise<MCPResponse> {
   const id = req.id ?? null;
@@ -370,7 +370,7 @@ async function handleMCP(req: MCPRequest): Promise<MCPResponse> {
         };
 
       case "notifications/initialized":
-        // No-op notification — no response needed, but return empty result to be safe
+        // No-op notification â€” no response needed, but return empty result to be safe
         return { jsonrpc: "2.0", id, result: {} };
 
       case "tools/list":
@@ -429,7 +429,7 @@ async function handleMCP(req: MCPRequest): Promise<MCPResponse> {
   }
 }
 
-// ─── Health Dashboard ────────────────────────────────────────────────────────
+// â”€â”€â”€ Health Dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 async function checkUpstream(url: string, method = "GET"): Promise<string> {
   try {
@@ -472,13 +472,20 @@ async function healthDashboard(): Promise<Response> {
   });
 }
 
-// ─── Main Fetch Handler ──────────────────────────────────────────────────────
+// â”€â”€â”€ Main Fetch Handler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     const path = url.pathname;
-    const token = env.MCP_WEBHOOK_TOKEN ?? "esolat_secure_token";
+    if (!env.MCP_WEBHOOK_TOKEN) {
+      return new Response(
+        "Server misconfigured: MCP_WEBHOOK_TOKEN secret is not set.\n" +
+        "Run: wrangler secret put MCP_WEBHOOK_TOKEN",
+        { status: 500 }
+      );
+    }
+    const token = env.MCP_WEBHOOK_TOKEN;
     const expectedPrefix = `/mcp/${token}`;
 
 	// Root landing page
@@ -502,12 +509,12 @@ export default {
 
     const subPath = path.slice(expectedPrefix.length) || "/";
 
-    // ── Health dashboard (/health) ──────────────────────────────────────────
+    // â”€â”€ Health dashboard (/health) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (subPath === "/health" || subPath === "/health/") {
       return await healthDashboard();
     }
 
-    // ── MCP Streamable HTTP endpoint (/mcp) ─────────────────────────────────
+    // â”€â”€ MCP Streamable HTTP endpoint (/mcp) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (subPath === "/mcp" || subPath === "/mcp/" || subPath === "/") {
       // OPTIONS pre-flight (for M365 Copilot CORS)
       if (request.method === "OPTIONS") {
@@ -521,7 +528,7 @@ export default {
         });
       }
 
-      // GET — some clients probe the endpoint
+      // GET â€” some clients probe the endpoint
       if (request.method === "GET") {
         return Response.json({
           jsonrpc: "2.0",
@@ -567,3 +574,4 @@ export default {
     return Response.json({ error: "Not found" }, { status: 404 });
   },
 };
+
