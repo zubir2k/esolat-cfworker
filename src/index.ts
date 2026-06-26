@@ -142,9 +142,11 @@ async function resolveLocation(
 
 // â”€â”€â”€ Epoch â†’ HH:MM (UTC+8) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-function epochToMY(ts: number): string {
+function epochToMY(ts: number, dateStr: string): string {
   const d = new Date((ts + 8 * 3600) * 1000);
-  return `${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")}`;
+  const hh = String(d.getUTCHours()).padStart(2, "0");
+  const mm = String(d.getUTCMinutes()).padStart(2, "0");
+  return `${dateStr}T${hh}:${mm}:00+08:00`;
 }
 
 // â”€â”€â”€ Date Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -189,13 +191,13 @@ async function toolGetPrayerTimes(args: Record<string, unknown>): Promise<unknow
         day_name: dayName(year, month, day),
         hijri_raw: hijriRaw,
         hijri_full: `${parseInt(hD)} ${hijriLabel(hM, HIJRI_MONTHS)} ${hY}`,
-        fajr:    epochToMY(d.fajr as number),
-        syuruk:  epochToMY(syurukTs),
-        dhuha:   epochToMY(dhuhaTs),
-        dhuhr:   epochToMY(d.dhuhr as number),
-        asr:     epochToMY(d.asr as number),
-        maghrib: epochToMY(d.maghrib as number),
-        isha:    epochToMY(d.isha as number),
+        fajr:    epochToMY(d.fajr as number, `${year}-${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}`),
+        syuruk:  epochToMY(syurukTs, `${year}-${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}`),
+        dhuha:   epochToMY(dhuhaTs, `${year}-${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}`),
+        dhuhr:   epochToMY(d.dhuhr as number, `${year}-${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}`),
+        asr:     epochToMY(d.asr as number, `${year}-${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}`),
+        maghrib: epochToMY(d.maghrib as number, `${year}-${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}`),
+        isha:    epochToMY(d.isha as number, `${year}-${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}`),
       });
     }
   } else {
@@ -210,11 +212,14 @@ async function toolGetPrayerTimes(args: Record<string, unknown>): Promise<unknow
       const rawDate = gregDate.date as string; // "DD-MM-YYYY"
       const [dd, mm, yyyy] = rawDate.split("-");
       const parsedGreg = `${yyyy}-${mm}-${dd}`;
+      const toISO = (t: string) => `${parsedGreg}T${t}:00+08:00`;
 
       const syurukStr = (timings.Sunrise ?? "").split(" ")[0];
       const [sH, sM] = syurukStr.split(":").map(Number);
       const dhuhaMin = sM + 28;
-      const dhuhaStr = `${String(sH + Math.floor(dhuhaMin / 60)).padStart(2,"0")}:${String(dhuhaMin % 60).padStart(2,"0")}`;
+      const dhuhaHH = String(sH + Math.floor(dhuhaMin / 60)).padStart(2,"0");
+      const dhuhaMM = String(dhuhaMin % 60).padStart(2,"0");
+      const dhuhaStr = toISO(`${dhuhaHH}:${dhuhaMM}`);
 
       const hijriMeta = (d.date as Record<string, unknown>).hijri as Record<string, unknown>;
       const hMonthNum = String((hijriMeta.month as Record<string, unknown>).number).padStart(2,"0");
@@ -226,13 +231,13 @@ async function toolGetPrayerTimes(args: Record<string, unknown>): Promise<unknow
         day_name: ((gregDate.weekday as Record<string, unknown>).en as string),
         hijri_raw: `${hYear}-${hMonthNum}-${String(hDay).padStart(2,"0")}`,
         hijri_full: `${parseInt(hDay)} ${hijriLabel(hMonthNum, HIJRI_MONTHS)} ${hYear}`,
-        fajr:    (timings.Fajr ?? "").split(" ")[0],
-        syuruk:  syurukStr,
+        fajr:    toISO((timings.Fajr ?? "").split(" ")[0]),
+        syuruk:  toISO(syurukStr),
         dhuha:   dhuhaStr,
-        dhuhr:   (timings.Dhuhr ?? "").split(" ")[0],
-        asr:     (timings.Asr ?? "").split(" ")[0],
-        maghrib: (timings.Maghrib ?? "").split(" ")[0],
-        isha:    (timings.Isha ?? "").split(" ")[0],
+        dhuhr:   toISO((timings.Dhuhr ?? "").split(" ")[0]),
+        asr:     toISO((timings.Asr ?? "").split(" ")[0]),
+        maghrib: toISO((timings.Maghrib ?? "").split(" ")[0]),
+        isha:    toISO((timings.Isha ?? "").split(" ")[0]),
       });
     }
   }
