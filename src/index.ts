@@ -142,11 +142,12 @@ async function resolveLocation(
 
 // â”€â”€â”€ Epoch â†’ HH:MM (UTC+8) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-function epochToMY(ts: number, dateStr: string): string {
-  const d = new Date((ts + 8 * 3600) * 1000);
+function epochToMY(ts: number): string {
+  const d = new Date(ts * 1000);
   const hh = String(d.getUTCHours()).padStart(2, "0");
   const mm = String(d.getUTCMinutes()).padStart(2, "0");
-  return `${dateStr}T${hh}:${mm}:00+08:00`;
+  const date = d.toISOString().slice(0, 10);
+  return `${date}T${hh}:${mm}:00Z`;
 }
 
 // â”€â”€â”€ Date Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -191,13 +192,13 @@ async function toolGetPrayerTimes(args: Record<string, unknown>): Promise<unknow
         day_name: dayName(year, month, day),
         hijri_raw: hijriRaw,
         hijri_full: `${parseInt(hD)} ${hijriLabel(hM, HIJRI_MONTHS)} ${hY}`,
-        fajr:    epochToMY(d.fajr as number, `${year}-${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}`),
-        syuruk:  epochToMY(syurukTs, `${year}-${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}`),
-        dhuha:   epochToMY(dhuhaTs, `${year}-${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}`),
-        dhuhr:   epochToMY(d.dhuhr as number, `${year}-${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}`),
-        asr:     epochToMY(d.asr as number, `${year}-${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}`),
-        maghrib: epochToMY(d.maghrib as number, `${year}-${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}`),
-        isha:    epochToMY(d.isha as number, `${year}-${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}`),
+        fajr:    epochToMY(d.fajr as number),
+        syuruk:  epochToMY(syurukTs),
+        dhuha:   epochToMY(dhuhaTs),
+        dhuhr:   epochToMY(d.dhuhr as number),
+        asr:     epochToMY(d.asr as number),
+        maghrib: epochToMY(d.maghrib as number),
+        isha:    epochToMY(d.isha as number),
       });
     }
   } else {
@@ -212,7 +213,11 @@ async function toolGetPrayerTimes(args: Record<string, unknown>): Promise<unknow
       const rawDate = gregDate.date as string; // "DD-MM-YYYY"
       const [dd, mm, yyyy] = rawDate.split("-");
       const parsedGreg = `${yyyy}-${mm}-${dd}`;
-      const toISO = (t: string) => `${parsedGreg}T${t}:00+08:00`;
+      const toISO = (t: string): string => {
+        const [h, mi] = t.split(":").map(Number);
+        const utcDate = new Date(Date.UTC(parseInt(yyyy), parseInt(mm)-1, parseInt(dd), h-8, mi));
+        return utcDate.toISOString().slice(0,19) + "Z";
+      };
 
       const syurukStr = (timings.Sunrise ?? "").split(" ")[0];
       const [sH, sM] = syurukStr.split(":").map(Number);
