@@ -1,4 +1,4 @@
-﻿/**
+/**
  * esolat-mcp â€” Cloudflare Worker Edition
  * MCP Streamable HTTP server for Malaysian prayer times, mosque finder, Islamic events
  * Compatible with M365 Copilot, Claude.ai, and any MCP Streamable HTTP client
@@ -82,6 +82,15 @@ const TOOLS = [
     annotations: { readOnlyHint: true, openWorldHint: true },
   },
   {
+    name: "get_current_time",
+    description:
+      "Returns the current server UTC time and Hijri date. " +
+      "Call this first when the user asks about current prayer status, time remaining to next prayer, " +
+      "or any query requiring comparison of current time against prayer times.",
+    inputSchema: { type: "object", properties: {} },
+    annotations: { readOnlyHint: true, openWorldHint: false },
+  },
+  {
     name: "get_yearly_islamic_events",
     description:
       "Returns major Islamic calendar events and public holidays for a given year. " +
@@ -159,6 +168,23 @@ function dayName(year: number, month: number, day: number): string {
 
 function hijriLabel(hm: string, monthMap: Record<string, string>) {
   return monthMap[hm] ?? hm;
+}
+
+
+// --- Current Time Helper
+
+function getCurrentTimeUTC(): Record<string, string> {
+  const now = new Date();
+  const current_time_utc = now.toISOString().slice(0, 19) + "Z";
+  const hijriEpoch = new Date(Date.UTC(622, 6, 16)).getTime();
+  const daysSince = Math.floor((now.getTime() - hijriEpoch) / 86400000);
+  const hijriYear = Math.floor((daysSince * 30) / 10631) + 1;
+  const hijriDOY = daysSince - Math.floor(((hijriYear - 1) * 10631) / 30);
+  const hijriMonth = Math.min(Math.floor(hijriDOY / 29.5) + 1, 12);
+  const hijriDay = Math.max(1, hijriDOY - Math.floor((hijriMonth - 1) * 29.5));
+  const hijriMonthStr = String(hijriMonth).padStart(2, "0");
+  const hijri_date = `${hijriDay} ${HIJRI_MONTHS[hijriMonthStr] ?? hijriMonthStr} ${hijriYear}`;
+  return { current_time_utc, hijri_date, source: "server" };
 }
 
 // â”€â”€â”€ Tool Implementations â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -247,7 +273,10 @@ async function toolGetPrayerTimes(args: Record<string, unknown>): Promise<unknow
     }
   }
 
-  return prayers;
+  return {
+    current_time_utc: getCurrentTimeUTC().current_time_utc,
+    prayers,
+  };
 }
 
 async function toolFindMosques(args: Record<string, unknown>): Promise<unknown> {
@@ -375,7 +404,7 @@ async function handleMCP(req: MCPRequest): Promise<MCPResponse> {
           result: {
             protocolVersion: "2024-11-05",
             capabilities: { tools: {} },
-            serverInfo: { name: "esolat-mcp", version: "2.0.0" },
+            serverInfo: { name: "esolat-mcp", version: "2.0.1" },
           },
         };
 
@@ -394,6 +423,9 @@ async function handleMCP(req: MCPRequest): Promise<MCPResponse> {
 
         let result: unknown;
         switch (name) {
+          case "get_current_time":
+            result = getCurrentTimeUTC();
+            break;
           case "get_monthly_prayer_times":
             result = await toolGetPrayerTimes(args);
             break;
@@ -472,7 +504,7 @@ async function healthDashboard(): Promise<Response> {
     server: "esolat-mcp",
     edition: "Cloudflare Worker",
     status: "ONLINE",
-    version: "2.0.0",
+    version: "2.0.1",
     timestamp: now.toISOString(),
     upstream_apis: {
       jakim_e_solat: jakim,
