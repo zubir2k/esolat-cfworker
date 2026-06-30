@@ -84,9 +84,10 @@ const TOOLS = [
   {
     name: "get_current_time",
     description:
-      "Returns the current server UTC time and Hijri date. " +
+      "Returns the current server UTC time. " +
       "Call this first when the user asks about current prayer status, time remaining to next prayer, " +
-      "or any query requiring comparison of current time against prayer times.",
+      "or any query requiring comparison of current time against prayer times. " +
+      "For the Hijri date, use get_monthly_prayer_times or get_yearly_islamic_events instead.",
     inputSchema: { type: "object", properties: {} },
     annotations: { readOnlyHint: true, openWorldHint: false },
   },
@@ -174,17 +175,13 @@ function hijriLabel(hm: string, monthMap: Record<string, string>) {
 // --- Current Time Helper
 
 function getCurrentTimeUTC(): Record<string, string> {
+  // Hijri date intentionally omitted: it is region-dependent (moonsighting-based,
+  // can differ +/-1 day between JAKIM, Saudi, etc.). A pure arithmetic approximation
+  // would be misleading and inconsistent with the authoritative Hijri dates already
+  // returned by toolGetPrayerTimes / toolGetIslamicEvents (sourced from JAKIM/Aladhan).
   const now = new Date();
   const current_time_utc = now.toISOString().slice(0, 19) + "Z";
-  const hijriEpoch = new Date(Date.UTC(622, 6, 16)).getTime();
-  const daysSince = Math.floor((now.getTime() - hijriEpoch) / 86400000);
-  const hijriYear = Math.floor((daysSince * 30) / 10631) + 1;
-  const hijriDOY = daysSince - Math.floor(((hijriYear - 1) * 10631) / 30);
-  const hijriMonth = Math.min(Math.floor(hijriDOY / 29.5) + 1, 12);
-  const hijriDay = Math.max(1, hijriDOY - Math.floor((hijriMonth - 1) * 29.5));
-  const hijriMonthStr = String(hijriMonth).padStart(2, "0");
-  const hijri_date = `${hijriDay} ${HIJRI_MONTHS[hijriMonthStr] ?? hijriMonthStr} ${hijriYear}`;
-  return { current_time_utc, hijri_date, source: "server" };
+  return { current_time_utc, source: "server" };
 }
 
 // â”€â”€â”€ Tool Implementations â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -404,7 +401,7 @@ async function handleMCP(req: MCPRequest): Promise<MCPResponse> {
           result: {
             protocolVersion: "2024-11-05",
             capabilities: { tools: {} },
-            serverInfo: { name: "esolat-mcp", version: "2.0.1" },
+            serverInfo: { name: "esolat-mcp", version: "2.0.2" },
           },
         };
 
@@ -504,7 +501,7 @@ async function healthDashboard(): Promise<Response> {
     server: "esolat-mcp",
     edition: "Cloudflare Worker",
     status: "ONLINE",
-    version: "2.0.1",
+    version: "2.0.2",
     timestamp: now.toISOString(),
     upstream_apis: {
       jakim_e_solat: jakim,
