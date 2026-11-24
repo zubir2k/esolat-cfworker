@@ -17,7 +17,7 @@ No Docker. No Python. No server to manage. Runs on Cloudflare's global edge — 
 - ✅ Health dashboard endpoint
 - ✅ All 3 original tools preserved:
   - `get_monthly_prayer_times` — JAKIM/e-Solat (Malaysia) or Aladhan (global)
-  - `find_nearest_mosques` — e-Solat JAKIM (Malaysia) or OpenStreetMap (global)
+  - `find_nearest_mosques` — JejakMasjid API with JAKIM e-Solat fallback
   - `get_yearly_islamic_events` — JAKIM or Aladhan
 - ✅ CORS headers for browser-based clients
 - ✅ Batch JSON-RPC support
